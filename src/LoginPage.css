@@ -1,0 +1,95 @@
+.auth-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0a0e1a, #111827);
+}
+
+.auth-card {
+  width: 400px;
+  padding: 30px;
+  border-radius: 16px;
+
+  /* 👇 brighter + more contrast */
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  /* 👇 makes it pop off the page */
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+
+  backdrop-filter: blur(10px);
+}
+
+.auth-header {
+  margin-bottom: 20px;
+}
+
+.auth-tabs {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.auth-tabs button {
+  flex: 1;
+  padding: 10px;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-tabs .active {
+  color: #fff;
+  border-bottom: 2px solid #63b3ed;
+}
+
+.auth-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-bottom: 4px;
+}
+
+.input-group input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #1f2937;
+  background: #0f172a;
+  color: white;
+}
+
+.auth-btn {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background: #63b3ed;
+  color: #0a0e1a;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.auth-btn:hover {
+  opacity: 0.9;
+}
+
+.auth-back {
+  margin-top: 10px;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+}
