@@ -1,8 +1,9 @@
 import "./App.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LoginPage from "./LoginPage";
 import LibraryCacheGame from "./LibraryCacheGame";
 import SpellCounter from "./SpellCounter";
+import { apiFetch, hasToken, clearToken } from "./api";
 
 const GAMES = [
   {
@@ -31,7 +32,19 @@ const GAMES = [
   },
 ];
 
-function HomePage({ onGameClick, onOpenAuth, isLoggedIn, onLogout }) {
+const PROGRESS_LABELS = {
+  cache: "Library Cache Puzzle",
+  spell: "Spell Counter",
+};
+
+function HomePage({ onGameClick, onOpenAuth, isLoggedIn, user, onLogout, leaderboard, progress }) {
+  const totalXp = progress?.totalXp ?? 0;
+  const maxGameXp = Math.max(
+    progress?.perGame?.cache?.bestScore ?? 0,
+    progress?.perGame?.spell?.bestScore ?? 0,
+    1
+  );
+
   return (
     <div className="shell">
       <nav>
@@ -51,7 +64,14 @@ function HomePage({ onGameClick, onOpenAuth, isLoggedIn, onLogout }) {
 
         <div className="nav-right">
           {isLoggedIn ? (
-            <button className="btn-outline" onClick={onLogout}>Log out</button>
+            <>
+              {user?.username && (
+                <span style={{ color: "var(--text2)", fontSize: "13px", marginRight: "8px" }}>
+                  @{user.username}
+                </span>
+              )}
+              <button className="btn-outline" onClick={onLogout}>Log out</button>
+            </>
           ) : (
             <>
               <button className="btn-outline" onClick={onOpenAuth}>Log in</button>
@@ -182,21 +202,30 @@ function HomePage({ onGameClick, onOpenAuth, isLoggedIn, onLogout }) {
             <div className="section-line" />
           </div>
           <div className="panel" id="progress">
-            <div className="panel-title">YOUR PROGRESS</div>
-            {[
-              { label: "Library Cache Puzzle", xp: "0 XP", pct: "0%" },
-              { label: "Spell Counter", xp: "0 XP", pct: "0%" },
-            ].map((p) => (
-              <div key={p.label}>
-                <div className="xp-row">
-                  <span className="xp-label">{p.label}</span>
-                  <span className="xp-val">{p.xp}</span>
-                </div>
-                <div className="xp-track">
-                  <div className="xp-fill" style={{ width: p.pct }} />
-                </div>
+            <div className="panel-title">
+              YOUR PROGRESS{isLoggedIn ? ` · ${totalXp} XP TOTAL` : ""}
+            </div>
+            {!isLoggedIn && (
+              <div style={{ color: "var(--text3)", fontSize: "13px", marginBottom: "12px" }}>
+                Log in to track XP and accuracy across games.
               </div>
-            ))}
+            )}
+            {["cache", "spell"].map((gid) => {
+              const g = progress?.perGame?.[gid];
+              const xp = g?.bestScore ?? 0;
+              const pct = `${Math.round((xp / maxGameXp) * 100)}%`;
+              return (
+                <div key={gid}>
+                  <div className="xp-row">
+                    <span className="xp-label">{PROGRESS_LABELS[gid]}</span>
+                    <span className="xp-val">{xp} XP</span>
+                  </div>
+                  <div className="xp-track">
+                    <div className="xp-fill" style={{ width: pct }} />
+                  </div>
+                </div>
+              );
+            })}
             <div style={{ marginTop: "16px" }}>
               {[
                 { dot: "var(--accent)", name: "Pre-test · Cache Mapping", status: "AVAILABLE", bg: "rgba(99,179,237,0.12)", col: "var(--accent)" },
@@ -223,23 +252,28 @@ function HomePage({ onGameClick, onOpenAuth, isLoggedIn, onLogout }) {
           </div>
           <div className="panel" id="leaderboard">
             <div className="panel-title">CLASS LEADERBOARD</div>
-            {[
-              { rank: "01", score: "3,840", width: "100%" },
-              { rank: "02", score: "3,150", width: "82%" },
-              { rank: "03", score: "2,690", width: "70%" },
-              { rank: "04", score: "2,220", width: "58%" },
-              { rank: "05", score: "1,620", width: "42%" },
-            ].map((r) => (
-              <div key={r.rank} className="lb-row">
-                <div className="lb-rank">{r.rank}</div>
-                <div className="lb-avatar" style={{ background: "linear-gradient(135deg,#63b3ed,#b794f4)" }}>PL</div>
-                <div className="lb-name">Placeholder</div>
-                <div className="lb-bar">
-                  <div className="lb-bar-fill" style={{ width: r.width }} />
-                </div>
-                <div className="lb-score">{r.score}</div>
+            {leaderboard.length === 0 && (
+              <div style={{ color: "var(--text3)", fontSize: "13px" }}>
+                No scores yet — be the first!
               </div>
-            ))}
+            )}
+            {leaderboard.map((r) => {
+              const top = leaderboard[0]?.totalXp || 1;
+              const widthPct = `${Math.max(8, Math.round((r.totalXp / top) * 100))}%`;
+              const rankStr = String(r.rank).padStart(2, "0");
+              const initials = r.username.slice(0, 2).toUpperCase();
+              return (
+                <div key={r.rank} className="lb-row">
+                  <div className="lb-rank">{rankStr}</div>
+                  <div className="lb-avatar" style={{ background: "linear-gradient(135deg,#63b3ed,#b794f4)" }}>{initials}</div>
+                  <div className="lb-name">{r.username}</div>
+                  <div className="lb-bar">
+                    <div className="lb-bar-fill" style={{ width: widthPct }} />
+                  </div>
+                  <div className="lb-score">{r.totalXp.toLocaleString()}</div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -256,15 +290,50 @@ function App() {
   const [view, setView] = useState("home");
   const [selectedGameId, setSelectedGameId] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [progress, setProgress] = useState(null);
+  const [refreshTick, setRefreshTick] = useState(0);
 
-  const goHome = () => { setView("home"); setSelectedGameId(null); };
+  // Hydrate session from token on mount
+  useEffect(() => {
+    if (!hasToken()) return;
+    apiFetch("/auth/me")
+      .then((u) => { setUser(u); setIsLoggedIn(true); })
+      .catch(() => { clearToken(); });
+  }, []);
+
+  // Fetch leaderboard whenever home is shown or after a game/login
+  useEffect(() => {
+    if (view !== "home") return;
+    apiFetch("/leaderboard?limit=5")
+      .then(setLeaderboard)
+      .catch(() => setLeaderboard([]));
+  }, [view, refreshTick]);
+
+  // Fetch personal progress when logged in and on home
+  useEffect(() => {
+    if (view !== "home" || !isLoggedIn) return;
+    apiFetch("/progress/me")
+      .then(setProgress)
+      .catch(() => setProgress(null));
+  }, [view, isLoggedIn, refreshTick]);
+
+  const goHome = () => { setView("home"); setSelectedGameId(null); setRefreshTick((t) => t + 1); };
   const goGame = (id) => { setSelectedGameId(id); setView("game"); };
   const goAuth = () => setView("auth");
-  const handleFakeLogin = () => { setIsLoggedIn(true); setView("home"); };
-  const handleLogout = () => { setIsLoggedIn(false); setView("home"); setSelectedGameId(null); };
+  const handleLoginSuccess = (u) => { setUser(u); setIsLoggedIn(true); setView("home"); setRefreshTick((t) => t + 1); };
+  const handleLogout = () => {
+    clearToken();
+    setIsLoggedIn(false);
+    setUser(null);
+    setProgress(null);
+    setView("home");
+    setSelectedGameId(null);
+  };
 
   if (view === "auth") {
-    return <LoginPage onBack={goHome} onLoginSuccess={handleFakeLogin} />;
+    return <LoginPage onBack={goHome} onLoginSuccess={handleLoginSuccess} />;
   }
 
   if (view === "game") {
@@ -281,7 +350,10 @@ function App() {
       onGameClick={goGame}
       onOpenAuth={goAuth}
       isLoggedIn={isLoggedIn}
+      user={user}
       onLogout={handleLogout}
+      leaderboard={leaderboard}
+      progress={progress}
     />
   );
 }

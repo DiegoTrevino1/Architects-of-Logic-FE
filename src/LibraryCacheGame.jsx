@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./LibraryCacheGame.css";
+import { postProgress } from "./api";
 
 const MODES = [
   { id: "direct", label: "Direct Mapping", icon: "🗂️", desc: "Each book maps to exactly one cache slot determined by the index bits." },
@@ -75,6 +76,14 @@ export default function CacheMappingGame({ mod, onBack, onHome }) {
     setFeedback(null);
     setSelectedSlot(null);
     if (reqIdx + 1 >= SAMPLE_REQUESTS.length) {
+      const finalScore = score;
+      const accuracy = finalScore / (SAMPLE_REQUESTS.length * 100);
+      postProgress({
+        gameId: "cache",
+        score: finalScore,
+        accuracy,
+        xpEarned: finalScore,
+      });
       setPhase("summary");
     } else {
       setReqIdx((i) => i + 1);

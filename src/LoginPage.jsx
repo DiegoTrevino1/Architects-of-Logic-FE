@@ -1,8 +1,45 @@
 import { useState } from "react";
 import "./LoginPage.css";
+import { apiFetch, saveToken } from "./api";
 
 function LoginPage({ onBack, onLoginSuccess }) {
   const [mode, setMode] = useState("login");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [error, setError] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  const switchMode = (next) => {
+    setMode(next);
+    setError(null);
+  };
+
+  const handleSubmit = async () => {
+    setError(null);
+    if (!username.trim() || !password) {
+      setError("Username and password are required.");
+      return;
+    }
+    if (mode === "register" && password !== confirm) {
+      setError("Passwords do not match.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const path = mode === "login" ? "/auth/login" : "/auth/register";
+      const data = await apiFetch(path, {
+        method: "POST",
+        body: JSON.stringify({ username: username.trim(), password }),
+      });
+      saveToken(data.token);
+      onLoginSuccess?.(data.user);
+    } catch (e) {
+      setError(e.message || "Something went wrong.");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div className="auth-shell">
@@ -20,13 +57,13 @@ function LoginPage({ onBack, onLoginSuccess }) {
         <div className="auth-tabs">
           <button
             className={mode === "login" ? "active" : ""}
-            onClick={() => setMode("login")}
+            onClick={() => switchMode("login")}
           >
             Login
           </button>
           <button
             className={mode === "register" ? "active" : ""}
-            onClick={() => setMode("register")}
+            onClick={() => switchMode("register")}
           >
             Register
           </button>
@@ -36,25 +73,51 @@ function LoginPage({ onBack, onLoginSuccess }) {
           {/* USERNAME (for both login + register) */}
           <div className="input-group">
             <label>Username</label>
-            <input type="text" placeholder="Enter username" />
+            <input
+              type="text"
+              placeholder="Enter username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              autoComplete="username"
+            />
           </div>
 
           {/* PASSWORD */}
           <div className="input-group">
             <label>Password</label>
-            <input type="password" placeholder="Enter password" />
+            <input
+              type="password"
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete={mode === "login" ? "current-password" : "new-password"}
+              onKeyDown={(e) => mode === "login" && e.key === "Enter" && handleSubmit()}
+            />
           </div>
 
           {/* CONFIRM PASSWORD (register only) */}
           {mode === "register" && (
             <div className="input-group">
               <label>Confirm Password</label>
-              <input type="password" placeholder="Confirm password" />
+              <input
+                type="password"
+                placeholder="Confirm password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                autoComplete="new-password"
+                onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+              />
             </div>
           )}
 
-          <button className="auth-btn" onClick={onLoginSuccess}>
-            {mode === "login" ? "Log In" : "Create Account"}
+          {error && (
+            <div style={{ color: "#fc8181", fontSize: "13px", marginBottom: "8px" }}>
+              {error}
+            </div>
+          )}
+
+          <button className="auth-btn" onClick={handleSubmit} disabled={busy}>
+            {busy ? "…" : mode === "login" ? "Log In" : "Create Account"}
           </button>
 
           <button className="auth-back" onClick={onBack}>

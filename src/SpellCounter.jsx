@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./SpellCounter.css";
+import { postProgress } from "./api";
 
 const ENEMIES = [
   {
@@ -57,6 +58,8 @@ export default function NumberSystemsGame({ mod, onBack, onHome }) {
   const [result, setResult] = useState(null); // null | {correct, dmg, bits}
   const [score, setScore] = useState(0);
   const [round, setRound] = useState(0);
+  const [bitStats, setBitStats] = useState({ correct: 0, total: 0 });
+  const [progressSent, setProgressSent] = useState(false);
 
   // Pre/post test state
   const [testPhase, setTestPhase] = useState("pretest"); // reused for posttest too
@@ -77,6 +80,8 @@ export default function NumberSystemsGame({ mod, onBack, onHome }) {
     setTestAns(null);
     setTestResults([]);
     setShowingPosttest(false);
+    setBitStats({ correct: 0, total: 0 });
+    setProgressSent(false);
   };
 
   const handleTestAnswer = (idx) => {
@@ -118,11 +123,22 @@ export default function NumberSystemsGame({ mod, onBack, onHome }) {
     setEnemyHp((h) => Math.max(0, h - dmg));
     setPlayerHp((h) => Math.max(0, h - enemyDmg));
     if (correct) setScore((s) => s + 150 + dmg);
+    setBitStats((b) => ({ correct: b.correct + correctBits, total: b.total + 8 }));
     setResult({ correct, dmg, correctBits, playerBin });
   };
 
   const handleNextRound = () => {
     if (enemyHp <= 0 || playerHp <= 0) {
+      if (!progressSent) {
+        const accuracy = bitStats.total > 0 ? bitStats.correct / bitStats.total : 0;
+        postProgress({
+          gameId: "spell",
+          score,
+          accuracy,
+          xpEarned: score,
+        });
+        setProgressSent(true);
+      }
       // Battle over — go to post-test
       setShowingPosttest(true);
       setTestIdx(0);
