@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./LibraryCacheGame.css";
-import { postProgress } from "./api";
+import { postProgress, getQuestions } from "./api";
 
 const MODES = [
   { id: "direct", label: "Direct Mapping", icon: "🗂️", desc: "Each book maps to exactly one cache slot determined by the index bits." },
@@ -8,17 +8,12 @@ const MODES = [
   { id: "associative", label: "Fully Associative", icon: "🔓", desc: "Any book may be placed in any cache slot — maximum flexibility." },
 ];
 
-// 6-bit address: tag[5:4] index[3:2] offset[1:0]
-const SAMPLE_REQUESTS = [
-  { addr: "101101", tag: "10", index: "11", offset: "01", book: "Shelf 2, Book 1" },
-  { addr: "010010", tag: "01", index: "00", offset: "10", book: "Shelf 1, Book 2" },
-  { addr: "110100", tag: "11", index: "01", offset: "00", book: "Shelf 3, Book 0" },
-];
-
 // 4x4 cache grid (16 slots)
 const INIT_CACHE = Array(16).fill(null);
 
 export default function CacheMappingGame({ mod, onBack, onHome }) {
+  const [requests, setRequests] = useState([]);
+  const [loadError, setLoadError] = useState(null);
   const [mode, setMode] = useState(null); // null = mode select screen
   const [phase, setPhase] = useState("intro"); // intro | playing | summary
   const [reqIdx, setReqIdx] = useState(0);
@@ -28,10 +23,18 @@ export default function CacheMappingGame({ mod, onBack, onHome }) {
   const [score, setScore] = useState(0);
   const [placedCount, setPlacedCount] = useState(0);
 
-  const req = SAMPLE_REQUESTS[reqIdx % SAMPLE_REQUESTS.length];
+  useEffect(() => {
+    let cancelled = false;
+    getQuestions("cache", "request")
+      .then((rows) => { if (!cancelled) setRequests(rows); })
+      .catch((e) => { if (!cancelled) setLoadError(e.message || "Failed to load requests"); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const req = requests.length > 0 ? requests[reqIdx % requests.length] : null;
 
   // Correct slot for direct mapping = parseInt(index, 2)
-  const correctSlot = parseInt(req.index, 2);
+  const correctSlot = req ? parseInt(req.index, 2) : null;
 
   const handleModeSelect = (m) => {
     setMode(m);
@@ -75,9 +78,9 @@ export default function CacheMappingGame({ mod, onBack, onHome }) {
   const handleNext = () => {
     setFeedback(null);
     setSelectedSlot(null);
-    if (reqIdx + 1 >= SAMPLE_REQUESTS.length) {
+    if (reqIdx + 1 >= requests.length) {
       const finalScore = score;
-      const accuracy = finalScore / (SAMPLE_REQUESTS.length * 100);
+      const accuracy = finalScore / (requests.length * 100);
       postProgress({
         gameId: "cache",
         score: finalScore,
@@ -122,14 +125,32 @@ export default function CacheMappingGame({ mod, onBack, onHome }) {
 
           <div className="lcg-modes-grid">
             {MODES.map((m) => (
-              <button key={m.id} className="lcg-mode-card" onClick={() => handleModeSelect(m)}>
+              <button
+                key={m.id}
+                className="lcg-mode-card"
+                onClick={() => handleModeSelect(m)}
+                disabled={requests.length === 0}
+              >
                 <div className="lcg-mode-icon">{m.icon}</div>
                 <div className="lcg-mode-name">{m.label}</div>
                 <div className="lcg-mode-desc">{m.desc}</div>
-                <div className="lcg-mode-play">Play →</div>
+                <div className="lcg-mode-play">
+                  {loadError ? "Unavailable" : requests.length === 0 ? "Loading…" : "Play →"}
+                </div>
               </button>
             ))}
           </div>
+          {loadError && (
+            <div className="lcg-quiz-strip" style={{ borderColor: "#fc8181" }}>
+              <div className="lcg-quiz-left">
+                <span className="lcg-quiz-icon">⚠️</span>
+                <div>
+                  <div className="lcg-quiz-title">Could not load questions</div>
+                  <div className="lcg-quiz-sub">{loadError}</div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="lcg-quiz-strip">
             <div className="lcg-quiz-left">
@@ -148,7 +169,7 @@ export default function CacheMappingGame({ mod, onBack, onHome }) {
 
   // ── SUMMARY ──────────────────────────────────────────────────
   if (phase === "summary") {
-    const pct = Math.round((score / (SAMPLE_REQUESTS.length * 100)) * 100);
+    const pct = requests.length > 0 ? Math.round((score / (requests.length * 100)) * 100) : 0;
     return (
       <div className="lcg-shell">
         <div className="lcg-bg-grid" />
@@ -202,9 +223,9 @@ export default function CacheMappingGame({ mod, onBack, onHome }) {
 
         <div className="lcg-progress-row">
           <div className="lcg-progress-track">
-            <div className="lcg-progress-fill" style={{ width: `${(reqIdx / SAMPLE_REQUESTS.length) * 100}%` }} />
+            <div className="lcg-progress-fill" style={{ width: `${(reqIdx / requests.length) * 100}%` }} />
           </div>
-          <span className="lcg-progress-label">{reqIdx + 1} / {SAMPLE_REQUESTS.length}</span>
+          <span className="lcg-progress-label">{reqIdx + 1} / {requests.length}</span>
         </div>
 
         <div className="lcg-play-grid">

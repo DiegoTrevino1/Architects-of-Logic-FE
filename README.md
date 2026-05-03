@@ -2,8 +2,6 @@
 
 CWU Computer Architecture learning app. Two interactive games (cache mapping and number systems / spell counter) with pre/post-assessments, XP scoring, and a class leaderboard.
 
-> Spring 2026 · CWU CS Dept · Dr. Chunming Gao
-
 ## Stack
 
 - React 19 + Vite 8
@@ -23,12 +21,12 @@ For auth, progress, and the leaderboard to work, the backend must be running at 
 
 ## Scripts
 
-| Command           | What it does                          |
-| ----------------- | ------------------------------------- |
-| `npm run dev`     | Vite dev server with HMR              |
-| `npm run build`   | Production build → `dist/`            |
-| `npm run preview` | Serve the built `dist/` locally       |
-| `npm run lint`    | ESLint (flat config)                  |
+| Command           | What it does                    |
+| ----------------- | ------------------------------- |
+| `npm run dev`     | Vite dev server with HMR        |
+| `npm run build`   | Production build → `dist/`      |
+| `npm run preview` | Serve the built `dist/` locally |
+| `npm run lint`    | ESLint (flat config)            |
 
 ## Project layout
 

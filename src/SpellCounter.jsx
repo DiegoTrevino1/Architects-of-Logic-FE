@@ -1,36 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./SpellCounter.css";
-import { postProgress } from "./api";
-
-const ENEMIES = [
-  {
-    name: "Goblin Coder",
-    icon: "👺",
-    hp: 60,
-    color: "#68d391",
-    colorDim: "rgba(104,211,145,0.12)",
-    desc: "A weak enemy. Spells in simple binary.",
-    challenge: { display: "0b00011010", hex: "1A", binary: "00011010", answer: "E5", answerBin: "11100101", op: "Invert bits (NOT)", format: "hex" },
-  },
-  {
-    name: "Hex Witch",
-    icon: "🧙",
-    hp: 80,
-    color: "#f6ad55",
-    colorDim: "rgba(246,173,85,0.12)",
-    desc: "Casts spells in hexadecimal. Watch out!",
-    challenge: { display: "0xFF", hex: "FF", binary: "11111111", answer: "00", answerBin: "00000000", op: "Invert bits (NOT)", format: "hex" },
-  },
-  {
-    name: "Binary Lich",
-    icon: "💀",
-    hp: 100,
-    color: "#fc8181",
-    colorDim: "rgba(252,129,129,0.12)",
-    desc: "A powerful undead. Mixed formats and complex ops.",
-    challenge: { display: "0b10110100", hex: "B4", binary: "10110100", answer: "4B", answerBin: "01001011", op: "Invert bits (NOT)", format: "hex" },
-  },
-];
+import { postProgress, getQuestions } from "./api";
 
 const PHASES = ["select", "pretest", "battle", "posttest", "summary"];
 
@@ -43,13 +13,10 @@ function HealthBar({ hp, maxHp, color }) {
   );
 }
 
-const PRETEST_QUESTIONS = [
-  { q: "What is 0b1010 in decimal?", opts: ["8", "10", "12", "14"], correct: 1 },
-  { q: "What is 0xFF in binary?", opts: ["11110000", "11111111", "00001111", "10101010"], correct: 1 },
-  { q: "What is the bitwise NOT of 0b00001111?", opts: ["0b11110000", "0b00001111", "0b10101010", "0b11001100"], correct: 0 },
-];
-
 export default function NumberSystemsGame({ mod, onBack, onHome }) {
+  const [enemies, setEnemies] = useState([]);
+  const [pretestQuestions, setPretestQuestions] = useState([]);
+  const [loadError, setLoadError] = useState(null);
   const [phase, setPhase] = useState("select"); // select | pretest | battle | posttest | summary
   const [enemy, setEnemy] = useState(null);
   const [playerHp, setPlayerHp] = useState(100);
@@ -67,6 +34,23 @@ export default function NumberSystemsGame({ mod, onBack, onHome }) {
   const [testAns, setTestAns] = useState(null);
   const [testResults, setTestResults] = useState([]);
   const [showingPosttest, setShowingPosttest] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      getQuestions("spell", "enemy"),
+      getQuestions("spell", "pretest"),
+    ])
+      .then(([enemyRows, pretestRows]) => {
+        if (cancelled) return;
+        setEnemies(enemyRows);
+        setPretestQuestions(pretestRows);
+      })
+      .catch((e) => {
+        if (!cancelled) setLoadError(e.message || "Failed to load questions");
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   const startBattle = (e) => {
     setEnemy(e);
@@ -87,12 +71,12 @@ export default function NumberSystemsGame({ mod, onBack, onHome }) {
   const handleTestAnswer = (idx) => {
     if (testAns !== null) return;
     setTestAns(idx);
-    const correct = PRETEST_QUESTIONS[testIdx].correct === idx;
+    const correct = pretestQuestions[testIdx].correct === idx;
     setTestResults((r) => [...r, correct]);
   };
 
   const nextTestQ = () => {
-    if (testIdx + 1 >= PRETEST_QUESTIONS.length) {
+    if (testIdx + 1 >= pretestQuestions.length) {
       if (showingPosttest) {
         setPhase("summary");
       } else {
@@ -152,7 +136,7 @@ export default function NumberSystemsGame({ mod, onBack, onHome }) {
     }
   };
 
-  const tq = PRETEST_QUESTIONS[testIdx];
+  const tq = pretestQuestions[testIdx] || null;
 
   // ── SELECT ENEMY ──
   if (phase === "select") {
@@ -175,17 +159,40 @@ export default function NumberSystemsGame({ mod, onBack, onHome }) {
           </div>
 
           <div className="sc-enemies-grid">
-            {ENEMIES.map((e) => (
-              <button key={e.name} className="sc-enemy-card" onClick={() => startBattle(e)}>
-                <div className="sc-enemy-icon">{e.icon}</div>
-                <div className="sc-enemy-name">{e.name}</div>
-                <div className="sc-enemy-desc">{e.desc}</div>
-                <div className="sc-enemy-hp-preview">
-                  <span style={{ color: e.color, fontFamily: "var(--mono)", fontSize: "12px" }}>❤ {e.hp} HP</span>
-                </div>
-                <div className="sc-enemy-play" style={{ color: e.color }}>Challenge →</div>
-              </button>
-            ))}
+            {enemies.length === 0 && !loadError && (
+              <div className="sc-enemy-card" style={{ opacity: 0.6, cursor: "default" }}>
+                <div className="sc-enemy-icon">⌛</div>
+                <div className="sc-enemy-name">Loading enemies…</div>
+              </div>
+            )}
+            {loadError && (
+              <div className="sc-enemy-card" style={{ borderColor: "#fc8181", cursor: "default" }}>
+                <div className="sc-enemy-icon">⚠️</div>
+                <div className="sc-enemy-name">Could not load</div>
+                <div className="sc-enemy-desc">{loadError}</div>
+              </div>
+            )}
+            {enemies.map((e) => {
+              const ready = pretestQuestions.length > 0;
+              return (
+                <button
+                  key={e.name}
+                  className="sc-enemy-card"
+                  onClick={() => startBattle(e)}
+                  disabled={!ready}
+                >
+                  <div className="sc-enemy-icon">{e.icon}</div>
+                  <div className="sc-enemy-name">{e.name}</div>
+                  <div className="sc-enemy-desc">{e.desc}</div>
+                  <div className="sc-enemy-hp-preview">
+                    <span style={{ color: e.color, fontFamily: "var(--mono)", fontSize: "12px" }}>❤ {e.hp} HP</span>
+                  </div>
+                  <div className="sc-enemy-play" style={{ color: e.color }}>
+                    {ready ? "Challenge →" : "Loading…"}
+                  </div>
+                </button>
+              );
+            })}
           </div>
 
           <div className="sc-how-it-works">
@@ -223,9 +230,9 @@ export default function NumberSystemsGame({ mod, onBack, onHome }) {
 
           <div className="sc-test-card">
             <div className="sc-test-header">
-              <div className="sc-test-eyebrow">{phase === "pretest" ? "PRE-TEST" : "POST-TEST"} · Question {testIdx + 1} of {PRETEST_QUESTIONS.length}</div>
+              <div className="sc-test-eyebrow">{phase === "pretest" ? "PRE-TEST" : "POST-TEST"} · Question {testIdx + 1} of {pretestQuestions.length}</div>
               <div className="sc-test-track">
-                <div className="sc-test-fill" style={{ width: `${(testIdx / PRETEST_QUESTIONS.length) * 100}%` }} />
+                <div className="sc-test-fill" style={{ width: `${(testIdx / pretestQuestions.length) * 100}%` }} />
               </div>
             </div>
 
@@ -250,7 +257,7 @@ export default function NumberSystemsGame({ mod, onBack, onHome }) {
 
             {testAns !== null && (
               <button className="sc-btn-primary" onClick={nextTestQ} style={{ marginTop: "16px" }}>
-                {testIdx + 1 >= PRETEST_QUESTIONS.length
+                {testIdx + 1 >= pretestQuestions.length
                   ? (phase === "pretest" ? "Start Battle →" : "See Results →")
                   : "Next →"}
               </button>
