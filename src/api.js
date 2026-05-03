@@ -50,6 +50,10 @@ export async function getStatsOverview() {
   return apiFetch("/stats/overview");
 }
 
+export async function getGames() {
+  return apiFetch("/games");
+}
+
 export async function getRecentActivity(limit = 8) {
   return apiFetch(`/progress/recent?limit=${encodeURIComponent(limit)}`);
 }

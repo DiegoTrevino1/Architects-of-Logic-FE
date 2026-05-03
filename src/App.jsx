@@ -1,53 +1,29 @@
 import "./App.css";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import LoginPage from "./LoginPage";
 import LibraryCacheGame from "./LibraryCacheGame";
 import SpellCounter from "./SpellCounter";
+import NumberBaseDrill from "./NumberBaseDrill";
 import {
   apiFetch,
   hasToken,
   clearToken,
   getStatsOverview,
   getRecentActivity,
+  getGames,
 } from "./api";
 
 /* ─────────────────────────────────────────────────────────────
    STATIC CONFIG
    ───────────────────────────────────────────────────────────── */
 
-const GAMES = [
-  {
-    id: "cache",
-    icon: "🗄️",
-    title: "Library Cache Mapping Puzzle",
-    color: "#63b3ed",
-    colorDim: "rgba(99,179,237,0.12)",
-    colorBorder: "rgba(99,179,237,0.35)",
-    tag: "Cache Mapping",
-    desc: "You control an intelligent library system. Decode 6-bit binary addresses into tag, index, and offset fields — then place books into the correct cache slots using Direct, Set-Associative, or Fully Associative mapping.",
-    badges: ["Direct Mapping", "Set-Associative", "Fully Associative"],
-  },
-  {
-    id: "number",
-    icon: "⚡",
-    title: "Spell Counter",
-    color: "#f6ad55",
-    colorDim: "rgba(246,173,85,0.12)",
-    colorBorder: "rgba(246,173,85,0.35)",
-    tag: "Number Systems",
-    desc: "A turn-based combat game where enemies cast spells as binary, hex, or decimal numbers. Compute the correct counter-operation to deal damage — every wrong bit costs you HP.",
-    badges: ["Binary", "Hexadecimal", "Bitwise Ops"],
-  },
-];
-
-const PROGRESS_LABELS = {
-  cache: "Library Cache Puzzle",
-  spell: "Spell Counter",
-};
-
-const GAME_META = {
-  cache: { label: "Cache Puzzle", icon: "🗄️", color: "var(--accent)" },
-  spell: { label: "Spell Counter", icon: "⚡", color: "var(--accent3)" },
+// Maps backend game id -> the game component to render. Only entries listed
+// here are actually playable in the frontend; everything else falls back to
+// "Coming soon" treatment regardless of backend status.
+const GAME_COMPONENTS = {
+  cache: LibraryCacheGame,
+  spell: SpellCounter,
+  convert: NumberBaseDrill,
 };
 
 const AVATAR_PALETTE = [
@@ -233,18 +209,27 @@ function PageShell({
 }
 
 function GameCard({ game, onClick }) {
+  const playable =
+    game.status === "playable" && Object.prototype.hasOwnProperty.call(GAME_COMPONENTS, game.id);
+  const description = game.description || game.desc || "";
+
+  const handleClick = () => {
+    if (playable) onClick();
+  };
+
   return (
     <div
-      className="game-showcase-card fade-in"
+      className={`game-showcase-card fade-in ${playable ? "" : "is-coming-soon"}`}
       style={{
         "--card-accent": game.color,
         "--card-dim": game.colorDim,
         "--card-border": game.colorBorder,
       }}
-      onClick={onClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => e.key === "Enter" && onClick()}
+      onClick={handleClick}
+      role={playable ? "button" : undefined}
+      tabIndex={playable ? 0 : -1}
+      onKeyDown={(e) => playable && e.key === "Enter" && onClick()}
+      aria-disabled={!playable}
     >
       <div className="gsc-left">
         <div className="gsc-icon-wrap" style={{ background: game.colorDim }}>
@@ -255,9 +240,9 @@ function GameCard({ game, onClick }) {
             {game.tag}
           </div>
           <div className="gsc-title">{game.title}</div>
-          <p className="gsc-desc">{game.desc}</p>
+          <p className="gsc-desc">{description}</p>
           <div className="gsc-badges">
-            {game.badges.map((b) => (
+            {(game.badges || []).map((b) => (
               <span
                 key={b}
                 className="gsc-badge"
@@ -273,9 +258,13 @@ function GameCard({ game, onClick }) {
           </div>
         </div>
       </div>
-      <div className="gsc-play-btn" style={{ color: game.color }}>
-        Play →
-      </div>
+      {playable ? (
+        <div className="gsc-play-btn" style={{ color: game.color }}>
+          Play →
+        </div>
+      ) : (
+        <div className="gsc-soon-badge">Coming soon</div>
+      )}
     </div>
   );
 }
@@ -314,8 +303,8 @@ function LeaderboardRow({ row, isMe }) {
   );
 }
 
-function ActivityRow({ row, isMe }) {
-  const meta = GAME_META[row.gameId] || {
+function ActivityRow({ row, isMe, gameMeta }) {
+  const meta = gameMeta?.[row.gameId] || {
     label: row.gameId,
     icon: "🎮",
     color: "var(--text2)",
@@ -348,7 +337,16 @@ function ActivityRow({ row, isMe }) {
    PAGES
    ───────────────────────────────────────────────────────────── */
 
-function HomePage({ onNavigate, onGameClick, isLoggedIn, leaderboard, recentActivity, stats }) {
+function HomePage({
+  onNavigate,
+  onGameClick,
+  isLoggedIn,
+  leaderboard,
+  recentActivity,
+  stats,
+  games,
+  gameMeta,
+}) {
   const heroStats = stats
     ? [
         { num: formatNumber(stats.users), label: "Players" },
@@ -464,7 +462,7 @@ function HomePage({ onNavigate, onGameClick, isLoggedIn, leaderboard, recentActi
         </a>
       </div>
       <div className="games-showcase">
-        {GAMES.map((game) => (
+        {games.map((game) => (
           <GameCard key={game.id} game={game} onClick={() => onGameClick(game.id)} />
         ))}
       </div>
@@ -498,6 +496,7 @@ function HomePage({ onNavigate, onGameClick, isLoggedIn, leaderboard, recentActi
             {top3.map((r) => (
               <LeaderboardRow key={r.rank} row={r} isMe={false} />
             ))}
+            {/* games preview list above already; gameMeta passed through */}
           </div>
         </div>
 
@@ -524,7 +523,12 @@ function HomePage({ onNavigate, onGameClick, isLoggedIn, leaderboard, recentActi
               </div>
             )}
             {activitySnippet.map((row) => (
-              <ActivityRow key={row.id} row={row} isMe={false} />
+              <ActivityRow
+                key={row.id}
+                row={row}
+                isMe={false}
+                gameMeta={gameMeta}
+              />
             ))}
           </div>
         </div>
@@ -551,16 +555,24 @@ function HomePage({ onNavigate, onGameClick, isLoggedIn, leaderboard, recentActi
   );
 }
 
-function GamesPage({ onGameClick }) {
+function GamesPage({ games, onGameClick }) {
+  const playableCount = games.filter((g) => g.status === "playable").length;
+  const totalCount = games.length;
   return (
     <>
       <PageHeader
         eyebrow="Coursework · Interactive"
         title="Games"
-        subtitle="Two interactive modules covering cache mapping and binary number systems. Each game includes pre and post assessments, bit-level scoring, and instant feedback."
+        subtitle={`${playableCount} of ${totalCount} modules are live. Each game covers a core computer-architecture topic with bit-level scoring and instant feedback. More on the way.`}
       />
       <div className="games-showcase" style={{ marginBottom: 60 }}>
-        {GAMES.map((game) => (
+        {games.length === 0 && (
+          <div className="panel-empty" style={{ padding: 60 }}>
+            <div className="panel-empty-icon">⌛</div>
+            <div className="panel-empty-title">Loading games…</div>
+          </div>
+        )}
+        {games.map((game) => (
           <GameCard key={game.id} game={game} onClick={() => onGameClick(game.id)} />
         ))}
       </div>
@@ -568,14 +580,15 @@ function GamesPage({ onGameClick }) {
   );
 }
 
-function ProgressPage({ isLoggedIn, user, progress, onOpenAuth }) {
+function ProgressPage({ isLoggedIn, user, progress, onOpenAuth, games, gameMeta }) {
   const totalXp = progress?.totalXp ?? 0;
   const userRank = progress?.rank;
   const totalUsers = progress?.totalUsers ?? 0;
+  const playableGames = games.filter((g) => g.status === "playable");
+  const perGame = progress?.perGame || {};
   const maxGameXp = Math.max(
-    progress?.perGame?.cache?.bestScore ?? 0,
-    progress?.perGame?.spell?.bestScore ?? 0,
     1,
+    ...playableGames.map((g) => perGame[g.id]?.bestScore ?? 0),
   );
 
   return (
@@ -633,28 +646,35 @@ function ProgressPage({ isLoggedIn, user, progress, onOpenAuth }) {
               </div>
             )}
 
-            {["cache", "spell"].map((gid) => {
-              const g = progress?.perGame?.[gid];
+            {playableGames.map((game) => {
+              const g = perGame[game.id];
               const xp = g?.bestScore ?? 0;
               const plays = g?.plays ?? 0;
               const acc = g?.accuracy ?? 0;
               const pct = `${Math.round((xp / maxGameXp) * 100)}%`;
+              const meta = gameMeta?.[game.id];
               return (
-                <div key={gid} className="progress-row">
+                <div key={game.id} className="progress-row">
                   <div className="xp-row">
                     <span className="xp-label">
                       <span
                         className="xp-icon"
-                        style={{ color: GAME_META[gid].color }}
+                        style={{ color: meta?.color || game.color }}
                       >
-                        {GAME_META[gid].icon}
+                        {meta?.icon || game.icon}
                       </span>
-                      {PROGRESS_LABELS[gid]}
+                      {meta?.label || game.title}
                     </span>
                     <span className="xp-val">{formatNumber(xp)} XP</span>
                   </div>
                   <div className="xp-track">
-                    <div className="xp-fill" style={{ width: pct }} />
+                    <div
+                      className="xp-fill"
+                      style={{
+                        width: pct,
+                        background: `linear-gradient(90deg, ${game.color}, var(--accent))`,
+                      }}
+                    />
                   </div>
                   <div className="xp-meta">
                     <span>{plays} plays</span>
@@ -735,7 +755,7 @@ function LeaderboardPage({ leaderboard, isLoggedIn, user, stats }) {
   );
 }
 
-function ActivityPage({ recentActivity, isLoggedIn, user }) {
+function ActivityPage({ recentActivity, isLoggedIn, user, gameMeta }) {
   return (
     <>
       <PageHeader
@@ -767,6 +787,7 @@ function ActivityPage({ recentActivity, isLoggedIn, user }) {
             key={row.id}
             row={row}
             isMe={isLoggedIn && user?.username === row.username}
+            gameMeta={gameMeta}
           />
         ))}
       </div>
@@ -787,6 +808,7 @@ function App() {
   const [progress, setProgress] = useState(null);
   const [stats, setStats] = useState(null);
   const [recentActivity, setRecentActivity] = useState([]);
+  const [games, setGames] = useState([]);
   const [refreshTick, setRefreshTick] = useState(0);
 
   // Hydrate session from token on mount
@@ -799,6 +821,26 @@ function App() {
       })
       .catch(() => clearToken());
   }, []);
+
+  // Game catalog — fetch once on mount; rarely changes
+  useEffect(() => {
+    getGames()
+      .then(setGames)
+      .catch(() => setGames([]));
+  }, [refreshTick]);
+
+  // Build a map: gameId -> { label, icon, color } for activity feed / progress rows
+  const gameMeta = useMemo(() => {
+    const m = {};
+    for (const g of games) {
+      m[g.id] = {
+        label: g.tag || g.title,
+        icon: g.icon,
+        color: g.color,
+      };
+    }
+    return m;
+  }, [games]);
 
   const isPageView = ["home", "games", "progress", "leaderboard", "activity"].includes(view);
 
@@ -879,17 +921,16 @@ function App() {
   }
 
   if (view === "game") {
-    if (selectedGameId === "cache") {
-      return <LibraryCacheGame onBack={goHomeFromGame} onHome={goHomeFromGame} />;
+    const Component = GAME_COMPONENTS[selectedGameId];
+    if (Component) {
+      return <Component onBack={goHomeFromGame} onHome={goHomeFromGame} />;
     }
-    if (selectedGameId === "number") {
-      return <SpellCounter onBack={goHomeFromGame} onHome={goHomeFromGame} />;
-    }
+    // Unknown / not-yet-playable game id — fall back to home
   }
 
   let pageContent;
   if (view === "games") {
-    pageContent = <GamesPage onGameClick={goGame} />;
+    pageContent = <GamesPage games={games} onGameClick={goGame} />;
   } else if (view === "progress") {
     pageContent = (
       <ProgressPage
@@ -897,6 +938,8 @@ function App() {
         user={user}
         progress={progress}
         onOpenAuth={goAuth}
+        games={games}
+        gameMeta={gameMeta}
       />
     );
   } else if (view === "leaderboard") {
@@ -914,6 +957,7 @@ function App() {
         recentActivity={recentActivity}
         isLoggedIn={isLoggedIn}
         user={user}
+        gameMeta={gameMeta}
       />
     );
   } else {
@@ -925,6 +969,8 @@ function App() {
         leaderboard={leaderboard}
         recentActivity={recentActivity}
         stats={stats}
+        games={games}
+        gameMeta={gameMeta}
       />
     );
   }
