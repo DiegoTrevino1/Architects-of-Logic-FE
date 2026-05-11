@@ -41,6 +41,23 @@ export async function apiFetch(path, opts = {}) {
   return data;
 }
 
+export async function getQuestions(gameId, type) {
+  const rows = await apiFetch(`/questions/${encodeURIComponent(gameId)}/${encodeURIComponent(type)}`);
+  return rows.map((r) => r.payload);
+}
+
+export async function getStatsOverview() {
+  return apiFetch("/stats/overview");
+}
+
+export async function getGames() {
+  return apiFetch("/games");
+}
+
+export async function getRecentActivity(limit = 8) {
+  return apiFetch(`/progress/recent?limit=${encodeURIComponent(limit)}`);
+}
+
 export async function postProgress(payload) {
   if (!hasToken()) return null;
   try {
