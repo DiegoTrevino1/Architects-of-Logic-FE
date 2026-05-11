@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0a0e1a, #111827);
+  background: linear-gradient(135deg, #161b27, #1c2333);
 }
 
 .auth-card {
@@ -12,7 +12,7 @@
   border-radius: 16px;
 
   /* 👇 brighter + more contrast */
-  background: linear-gradient(135deg, #1e293b, #0f172a);
+  background: linear-gradient(135deg, #2a3654, #1c2333);
 
   border: 1px solid rgba(255, 255, 255, 0.12);
 
@@ -36,14 +36,14 @@
   padding: 10px;
   background: none;
   border: none;
-  color: #9ca3af;
+  color: #b8d0e8;
   font-weight: 600;
   cursor: pointer;
 }
 
 .auth-tabs .active {
   color: #fff;
-  border-bottom: 2px solid #63b3ed;
+  border-bottom: 2px solid #58a6ff;
 }
 
 .auth-body {
@@ -59,15 +59,15 @@
 
 .input-group label {
   font-size: 12px;
-  color: #9ca3af;
+  color: #b8d0e8;
   margin-bottom: 4px;
 }
 
 .input-group input {
   padding: 10px;
   border-radius: 8px;
-  border: 1px solid #1f2937;
-  background: #0f172a;
+  border: 1px solid rgba(88, 166, 255, 0.25);
+  background: #131c2e;
   color: white;
 }
 
@@ -76,7 +76,7 @@
   padding: 12px;
   border-radius: 8px;
   border: none;
-  background: #63b3ed;
+  background: #58a6ff;
   color: #0a0e1a;
   font-weight: bold;
   cursor: pointer;
@@ -90,6 +90,6 @@
   margin-top: 10px;
   background: none;
   border: none;
-  color: #9ca3af;
+  color: #b8d0e8;
   cursor: pointer;
 }

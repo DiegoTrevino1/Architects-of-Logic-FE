@@ -10,9 +10,9 @@ const GAMES = [
     id: "cache",
     icon: "🗄️",
     title: "Library Cache Mapping Puzzle",
-    color: "#63b3ed",
-    colorDim: "rgba(99,179,237,0.12)",
-    colorBorder: "rgba(99,179,237,0.35)",
+    color: "#58a6ff",
+    colorDim: "rgba(88,166,255,0.16)",
+    colorBorder: "rgba(88,166,255,0.5)",
     tag: "Cache Mapping",
     desc: "You control an intelligent library system. Decode 6-bit binary addresses into tag, index, and offset fields — then place books into the correct cache slots using Direct, Set-Associative, or Fully Associative mapping.",
     badges: ["Direct Mapping", "Set-Associative", "Fully Associative"],
@@ -22,9 +22,9 @@ const GAMES = [
     id: "number",
     icon: "⚡",
     title: "Spell Counter",
-    color: "#f6ad55",
-    colorDim: "rgba(246,173,85,0.12)",
-    colorBorder: "rgba(246,173,85,0.35)",
+    color: "#e3b341",
+    colorDim: "rgba(227,179,65,0.16)",
+    colorBorder: "rgba(227,179,65,0.5)",
     tag: "Number Systems",
     desc: "A turn-based combat game where enemies cast spells as binary, hex, or decimal numbers. Compute the correct counter-operation to deal damage — every wrong bit costs you HP.",
     badges: ["Binary", "Hexadecimal", "Bitwise Ops"],
@@ -49,7 +49,7 @@ function HomePage({ onGameClick, onOpenAuth, isLoggedIn, user, onLogout, leaderb
     <div className="shell">
       <nav>
         <div className="logo">
-          <div className="logo-icon">Σ</div>
+          <div className="logo-icon">CWU</div>
           <div>
             <div className="logo-text">Architects of Logic</div>
             <div className="logo-sub">CWU · Computer Architecture</div>
@@ -228,8 +228,8 @@ function HomePage({ onGameClick, onOpenAuth, isLoggedIn, user, onLogout, leaderb
             })}
             <div style={{ marginTop: "16px" }}>
               {[
-                { dot: "var(--accent)", name: "Pre-test · Cache Mapping", status: "AVAILABLE", bg: "rgba(99,179,237,0.12)", col: "var(--accent)" },
-                { dot: "var(--accent3)", name: "Pre-test · Number Systems", status: "AVAILABLE", bg: "rgba(246,173,85,0.12)", col: "var(--accent3)" },
+                { dot: "var(--accent)", name: "Pre-test · Cache Mapping", status: "AVAILABLE", bg: "rgba(88,166,255,0.16)", col: "var(--accent)" },
+                { dot: "var(--accent3)", name: "Pre-test · Number Systems", status: "AVAILABLE", bg: "rgba(227,179,65,0.16)", col: "var(--accent3)" },
               ].map((a) => (
                 <div key={a.name} className="assess-item">
                   <div className="assess-left">
@@ -265,7 +265,7 @@ function HomePage({ onGameClick, onOpenAuth, isLoggedIn, user, onLogout, leaderb
               return (
                 <div key={r.rank} className="lb-row">
                   <div className="lb-rank">{rankStr}</div>
-                  <div className="lb-avatar" style={{ background: "linear-gradient(135deg,#63b3ed,#b794f4)" }}>{initials}</div>
+                  <div className="lb-avatar" style={{ background: "linear-gradient(135deg,#58a6ff,#bc8cff)" }}>{initials}</div>
                   <div className="lb-name">{r.username}</div>
                   <div className="lb-bar">
                     <div className="lb-bar-fill" style={{ width: widthPct }} />

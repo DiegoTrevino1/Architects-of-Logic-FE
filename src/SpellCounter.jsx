@@ -162,7 +162,10 @@ export default function NumberSystemsGame({ mod, onBack, onHome }) {
         <div className="sc-container">
           <div className="sc-topbar">
             <button className="sc-back-btn" onClick={onBack}>← Back</button>
-            <div className="sc-module-tag">🔢 Spell Counter</div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div className="logo-icon">CWU</div>
+              <div className="sc-module-tag">🔢 Spell Counter</div>
+            </div>
             <button className="sc-home-btn" onClick={onHome}>⌂ Home</button>
           </div>
 
@@ -217,7 +220,10 @@ export default function NumberSystemsGame({ mod, onBack, onHome }) {
         <div className="sc-container sc-container--narrow">
           <div className="sc-topbar">
             <button className="sc-back-btn" onClick={() => setPhase("select")}>← Back</button>
-            <div className="sc-module-tag">{phase === "pretest" ? "📋 Pre-Assessment" : "📋 Post-Assessment"}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div className="logo-icon">CWU</div>
+              <div className="sc-module-tag">{phase === "pretest" ? "📋 Pre-Assessment" : "📋 Post-Assessment"}</div>
+            </div>
             <div />
           </div>
 
@@ -274,7 +280,10 @@ export default function NumberSystemsGame({ mod, onBack, onHome }) {
         <div className="sc-container sc-container--narrow">
           <div className="sc-topbar">
             <button className="sc-back-btn" onClick={() => setPhase("select")}>← Enemies</button>
-            <div className="sc-module-tag">🔢 Spell Counter</div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div className="logo-icon">CWU</div>
+              <div className="sc-module-tag">🔢 Spell Counter</div>
+            </div>
             <button className="sc-home-btn" onClick={onHome}>⌂ Home</button>
           </div>
           <div className="sc-summary-card">
@@ -314,7 +323,10 @@ export default function NumberSystemsGame({ mod, onBack, onHome }) {
       <div className="sc-container">
         <div className="sc-topbar">
           <button className="sc-back-btn" onClick={() => setPhase("select")}>← Flee</button>
-          <div className="sc-module-tag" style={{ color: enemy.color }}>⚔ Round {round + 1}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div className="logo-icon">CWU</div>
+            <div className="sc-module-tag" style={{ color: enemy.color }}>⚔ Round {round + 1}</div>
+          </div>
           <div className="sc-score-pill">
             <span className="sc-score-lbl">XP</span>
             <span className="sc-score-val">{score}</span>

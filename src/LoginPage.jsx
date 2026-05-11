@@ -46,7 +46,7 @@ function LoginPage({ onBack, onLoginSuccess }) {
       <div className="auth-card">
         <div className="auth-header">
           <div className="logo">
-            <div className="logo-icon">Σ</div>
+            <div className="logo-icon">CWU</div>
             <div>
               <div className="logo-text">ARCHQUEST</div>
               <div className="logo-sub">CWU · Computer Architecture</div>

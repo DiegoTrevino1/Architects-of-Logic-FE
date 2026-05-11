@@ -9,25 +9,25 @@
 }
 
 :root {
-  --bg: #0a0e1a;
-  --bg2: #111827;
-  --bg3: #1a2235;
-  --surface: #1e2a3d;
-  --surface2: #243045;
-  --border: rgba(99, 179, 237, 0.15);
-  --border2: rgba(99, 179, 237, 0.28);
-  --accent: #63b3ed;
-  --accent2: #4fd1c5;
-  --accent3: #f6ad55;
-  --accent4: #fc8181;
-  --accent5: #b794f4;
-  --text: #e2e8f0;
-  --text2: #94a3b8;
-  --text3: #64748b;
-  --green: #68d391;
+  --bg: #161b27;
+  --bg2: #1c2333;
+  --bg3: #222d40;
+  --surface: #2a3654;
+  --surface2: #31406a;
+  --border: rgba(88, 166, 255, 0.22);
+  --border2: rgba(88, 166, 255, 0.48);
+  --accent: #58a6ff;
+  --accent2: #3fb950;
+  --accent3: #e3b341;
+  --accent4: #f85149;
+  --accent5: #bc8cff;
+  --text: #f0f6fc;
+  --text2: #c9d1d9;
+  --text3: #8b949e;
+  --green: #3fb950;
   --mono: 'Space Mono', monospace;
   --sans: 'DM Sans', sans-serif;
-  --glow: 0 0 20px rgba(99, 179, 237, 0.18);
+  --glow: 0 0 28px rgba(88, 166, 255, 0.45);
 }
 
 html,
@@ -52,8 +52,8 @@ body::before {
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(rgba(99, 179, 237, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(99, 179, 237, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(88, 166, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(88, 166, 255, 0.08) 1px, transparent 1px);
   background-size: 40px 40px;
   pointer-events: none;
   z-index: 0;
@@ -87,14 +87,15 @@ nav {
   width: 34px;
   height: 34px;
   border-radius: 8px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  background: #c8102e;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
-  color: #0a0e1a;
+  color: #ffffff;
+  letter-spacing: 0.12em;
 }
 
 .logo-text {
@@ -147,7 +148,7 @@ nav {
 }
 
 .btn-outline:hover {
-  background: rgba(99, 179, 237, 0.08);
+  background: rgba(88, 166, 255, 0.14);
 }
 
 .btn-primary {
@@ -164,7 +165,7 @@ nav {
 }
 
 .btn-primary:hover {
-  background: #90cdf4;
+  background: #7dd3fc;
 }
 
 /* HERO */
@@ -180,7 +181,7 @@ nav {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(99, 179, 237, 0.1);
+  background: rgba(88, 166, 255, 0.14);
   border: 1px solid var(--border2);
   border-radius: 20px;
   padding: 4px 14px;
@@ -253,7 +254,7 @@ h1 {
 }
 
 .btn-lg.primary:hover {
-  background: #90cdf4;
+  background: #7dd3fc;
   transform: translateY(-1px);
   box-shadow: var(--glow);
 }
