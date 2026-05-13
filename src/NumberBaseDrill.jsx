@@ -17,6 +17,21 @@ const PAIRS = [
   ["dec", "bin"],
 ];
 
+// Rounds 1-3: binary↔decimal only, values 0-15 (easy mental math)
+// Rounds 4-7: all pairs, values 0-63
+// Rounds 8-10: all pairs, full 0-255 range
+const DIFFICULTY_TIERS = [
+  { pairs: [["bin", "dec"], ["dec", "bin"]], maxVal: 15,  label: "Easy" },
+  { pairs: PAIRS,                            maxVal: 63,  label: "Medium" },
+  { pairs: PAIRS,                            maxVal: 255, label: "Hard" },
+];
+
+function tierForRound(roundIdx) {
+  if (roundIdx < 3) return DIFFICULTY_TIERS[0];
+  if (roundIdx < 7) return DIFFICULTY_TIERS[1];
+  return DIFFICULTY_TIERS[2];
+}
+
 const ROUND_COUNT = 10;
 const ROUND_SECONDS = 12;
 
@@ -40,13 +55,15 @@ function normalize(input, baseId) {
   return s.replace(/\s+/g, "");
 }
 
-function buildRound() {
-  const [from, to] = PAIRS[Math.floor(Math.random() * PAIRS.length)];
-  const value = Math.floor(Math.random() * 256); // 0..255 (1 byte)
+function buildRound(roundIdx) {
+  const tier = tierForRound(roundIdx);
+  const [from, to] = tier.pairs[Math.floor(Math.random() * tier.pairs.length)];
+  const value = Math.floor(Math.random() * (tier.maxVal + 1));
   return {
     from,
     to,
     value,
+    difficulty: tier.label,
     promptText: format(value, from),
     answerText: format(value, to),
   };
@@ -54,7 +71,7 @@ function buildRound() {
 
 function buildRounds(n) {
   const rounds = [];
-  while (rounds.length < n) rounds.push(buildRound());
+  for (let i = 0; i < n; i++) rounds.push(buildRound(i));
   return rounds;
 }
 
@@ -291,7 +308,14 @@ export default function NumberBaseDrill({ onBack, onHome }) {
           <button className="nbd-back-btn" onClick={() => setPhase("intro")}>
             ← Quit
           </button>
-          <div className="nbd-module-tag">🧮 Round {roundIdx + 1} / {ROUND_COUNT}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div className="nbd-module-tag">🧮 Round {roundIdx + 1} / {ROUND_COUNT}</div>
+            {round.difficulty && (
+              <span className={`nbd-difficulty-badge nbd-difficulty-${round.difficulty.toLowerCase()}`}>
+                {round.difficulty}
+              </span>
+            )}
+          </div>
           <div className="nbd-score-pill">
             <span className="nbd-score-lbl">XP</span>
             <span className="nbd-score-val">{score}</span>
