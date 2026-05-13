@@ -186,6 +186,11 @@ export default function NumberSystemsGame({ mod, onBack, onHome }) {
                 >
                   <div className="sc-enemy-icon">{e.icon}</div>
                   <div className="sc-enemy-name">{e.name}</div>
+                  {e.difficulty && (
+                    <span className={`sc-difficulty-badge sc-difficulty-${e.difficulty}`}>
+                      {e.difficulty === "easy" ? "⬤ Easy" : e.difficulty === "medium" ? "⬤ Medium" : "⬤ Hard"}
+                    </span>
+                  )}
                   <div className="sc-enemy-desc">{e.desc}</div>
                   <div className="sc-enemy-hp-preview">
                     <span style={{ color: e.color, fontFamily: "var(--mono)", fontSize: "12px" }}>❤ {e.hp} HP</span>
