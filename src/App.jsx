@@ -562,7 +562,6 @@ function GamesPage({ games, onGameClick }) {
   return (
     <>
       <PageHeader
-        eyebrow="Coursework · Interactive"
         title="Games"
         subtitle={`${playableCount} of ${totalCount} modules are live. Each game covers a core computer-architecture topic with bit-level scoring and instant feedback. More on the way.`}
       />
@@ -595,7 +594,7 @@ function ProgressPage({ isLoggedIn, user, progress, onOpenAuth, games, gameMeta 
   return (
     <>
       <PageHeader
-        eyebrow={isLoggedIn ? `Signed in as @${user?.username}` : "Your account"}
+        eyebrow={isLoggedIn ? null : "Your account"}
         title="Your Progress"
         subtitle={
           isLoggedIn
@@ -702,7 +701,6 @@ function LeaderboardPage({ leaderboard, isLoggedIn, user, stats }) {
   return (
     <>
       <PageHeader
-        eyebrow="Class · Live"
         title="Leaderboard"
         subtitle={`Top ${leaderboard.length || 20} players by total XP earned across both games.`}
         action={
@@ -760,7 +758,6 @@ function ActivityPage({ recentActivity, isLoggedIn, user, gameMeta }) {
   return (
     <>
       <PageHeader
-        eyebrow="Class · Live"
         title="Activity Feed"
         subtitle="Every play across the class as it happens. Watch new sessions appear in real time."
       />

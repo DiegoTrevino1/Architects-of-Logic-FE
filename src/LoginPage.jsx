@@ -111,7 +111,7 @@ function LoginPage({ onBack, onLoginSuccess }) {
           )}
 
           {error && (
-            <div style={{ color: "#fc8181", fontSize: "13px", marginBottom: "8px" }}>
+            <div style={{ color: "var(--red)", fontSize: "13px", marginBottom: "8px" }}>
               {error}
             </div>
           )}

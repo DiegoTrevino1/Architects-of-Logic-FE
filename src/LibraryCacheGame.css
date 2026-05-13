@@ -479,17 +479,19 @@
   border-radius: 8px;
   border: none;
   background: var(--accent);
-  color: #0a0e1a;
+  color: #ffffff;
   font-family: var(--sans);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(43, 115, 211, 0.22);
 }
 
 .lcg-btn-primary:hover {
-  filter: brightness(1.1);
+  background: var(--accent-hover);
   transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(43, 115, 211, 0.32);
 }
 
 .lcg-btn-ghost {

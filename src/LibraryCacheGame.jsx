@@ -102,7 +102,6 @@ export default function CacheMappingGame({ mod, onBack, onHome }) {
           <div className="lcg-topbar">
             <button className="lcg-back-btn" onClick={onBack}>← Back</button>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <div className="logo-icon">CWU</div>
               <div className="lcg-module-tag">🗄️ Library Cache Mapping Puzzle</div>
             </div>
             <button className="lcg-home-btn" onClick={onHome}>⌂ Home</button>
@@ -189,7 +188,6 @@ export default function CacheMappingGame({ mod, onBack, onHome }) {
           <div className="lcg-topbar">
             <button className="lcg-back-btn" onClick={onBack}>← Back</button>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <div className="logo-icon">CWU</div>
               <div className="lcg-module-tag">🗄️ Library Cache Mapping Puzzle</div>
             </div>
             <button className="lcg-home-btn" onClick={onHome}>⌂ Home</button>
@@ -208,7 +206,6 @@ export default function CacheMappingGame({ mod, onBack, onHome }) {
             </div>
             <div className="lcg-summary-actions">
               <button className="lcg-btn-primary" onClick={() => { setMode(null); setPhase("intro"); }}>Try Another Mode</button>
-              <button className="lcg-quiz-btn" style={{ flex: 1 }}>Take Post-Test →</button>
               <button className="lcg-btn-ghost" onClick={onHome}>Home</button>
             </div>
           </div>
@@ -230,7 +227,6 @@ export default function CacheMappingGame({ mod, onBack, onHome }) {
         <div className="lcg-topbar">
           <button className="lcg-back-btn" onClick={() => setMode(null)}>← Modes</button>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <div className="logo-icon">CWU</div>
             <div className="lcg-module-tag">🗄️ {mode.label}</div>
           </div>
           <div className="lcg-score-pill">

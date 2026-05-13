@@ -1317,18 +1317,20 @@ footer {
 
 .howto-steps li {
   counter-increment: howto;
-  display: grid;
-  grid-template-columns: 32px 1fr;
-  align-items: start;
-  gap: 14px;
+  position: relative;
+  padding-left: 44px;
+  min-height: 28px;
   font-size: 14px;
-  line-height: 1.55;
+  line-height: 1.6;
   color: var(--text2);
 }
 
 .howto-steps li::before {
   content: counter(howto);
-  display: inline-flex;
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
   align-items: center;
   justify-content: center;
   width: 28px;
@@ -1377,7 +1379,7 @@ footer {
 
 .howto-example-body {
   font-size: 14px;
-  line-height: 1.7;
+  line-height: 2.1;
   color: var(--text2);
 }
 
