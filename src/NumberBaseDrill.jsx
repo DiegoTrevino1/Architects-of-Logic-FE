@@ -207,6 +207,25 @@ export default function NumberBaseDrill({ onBack, onHome }) {
               ))}
             </div>
 
+            <div className="howto-panel">
+              <div className="howto-title">How to play</div>
+              <ol className="howto-steps">
+                <li>An 8-bit value flashes in one base — <strong>binary</strong>, <strong>decimal</strong>, or <strong>hex</strong>.</li>
+                <li>The input label tells you the <strong>target base</strong> to convert into.</li>
+                <li>Type the converted value and press <em>Enter</em> before the 12-second timer hits zero.</li>
+                <li>Correct = <strong>100 XP</strong> + an <strong>8 XP/sec</strong> speed bonus. Wrong or timeout = 0.</li>
+              </ol>
+              <div className="howto-example">
+                <div className="howto-example-title">Worked example</div>
+                <div className="howto-example-body">
+                  Prompt: <code>0b10110100</code> · target: <strong>Hex</strong><br />
+                  Split into nibbles → <code>1011</code> <code>0100</code><br />
+                  Convert each nibble → <code>B</code>, <code>4</code><br />
+                  Answer: <code>B4</code>
+                </div>
+              </div>
+            </div>
+
             <button className="nbd-btn-primary" onClick={startGame}>
               Start Drill →
             </button>

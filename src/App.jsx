@@ -250,8 +250,8 @@ function GameCard({ game, onClick }) {
                 className="gsc-badge"
                 style={{
                   background: game.colorDim,
-                  color: game.color,
-                  borderColor: game.colorBorder,
+                  color: "var(--text)",
+                  borderColor: game.color,
                 }}
               >
                 {b}

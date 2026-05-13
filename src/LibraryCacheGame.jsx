@@ -155,16 +155,25 @@ export default function CacheMappingGame({ mod, onBack, onHome }) {
             </div>
           )}
 
-          <div className="lcg-quiz-strip">
-            <div className="lcg-quiz-left">
-              <span className="lcg-quiz-icon">📋</span>
-              <div>
-                <div className="lcg-quiz-title">Pre-Assessment Available</div>
-                <div className="lcg-quiz-sub">Take a quick quiz before playing to establish a baseline. Takes ~3 minutes.</div>
+          <div className="howto-panel">
+            <div className="howto-title">How to play</div>
+            <ol className="howto-steps">
+              <li>A 6-bit address appears with a book. Split it into <strong>tag</strong>, <strong>index</strong>, and <strong>offset</strong> — 2 bits each.</li>
+              <li>The <em>mapping mode</em> you picked decides which slots are valid for that address.</li>
+              <li>Click a valid slot in the 4×4 cache grid, then press <em>Place</em>.</li>
+              <li>Correct placement scores <strong>100 XP</strong>. Wrong placements still fill the slot but earn 0.</li>
+            </ol>
+            <div className="howto-example">
+              <div className="howto-example-title">Worked example — address <code>110010</code></div>
+              <div className="howto-example-body">
+                tag = <code>11</code> · index = <code>00</code> · offset = <code>10</code><br />
+                <strong>Direct mapping:</strong> slot is determined by the index → row 0.<br />
+                <strong>Set-associative:</strong> the index picks a set → place in any open slot of row 0.<br />
+                <strong>Fully associative:</strong> place in any empty slot anywhere in the grid.
               </div>
             </div>
-            <button className="lcg-quiz-btn">Take Pre-Test →</button>
           </div>
+
         </div>
       </div>
     );

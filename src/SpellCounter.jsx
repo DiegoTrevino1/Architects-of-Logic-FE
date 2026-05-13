@@ -214,6 +214,25 @@ export default function NumberSystemsGame({ mod, onBack, onHome }) {
               ))}
             </div>
           </div>
+
+          <div className="howto-panel">
+            <div className="howto-title">How to play</div>
+            <ol className="howto-steps">
+              <li>Pick an enemy — each tests a different number system (binary, hex, or decimal).</li>
+              <li>Answer a short <strong>pre-test</strong> (multiple choice) to set your baseline.</li>
+              <li>In battle, the enemy casts a number plus an operation. Compute the result and type your answer as an <strong>8-bit value</strong>.</li>
+              <li>Damage is <em>bit-level</em>: each of the 8 bits you get right deals up to <strong>40 damage</strong>. A perfect answer also adds 150 XP.</li>
+              <li>Wrong full answers cost <strong>15 HP</strong>. The battle ends when either side hits 0, then you take the post-test.</li>
+            </ol>
+            <div className="howto-example">
+              <div className="howto-example-title">Worked example</div>
+              <div className="howto-example-body">
+                Enemy casts <code>0x6A</code> · operation: <strong>bitwise NOT</strong><br />
+                Binary: <code>0110 1010</code> → flip every bit → <code>1001 0101</code><br />
+                Answer: <code>0x95</code> → all 8 bits correct → <strong>40 damage</strong>.
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );

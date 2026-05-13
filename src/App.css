@@ -759,8 +759,8 @@ h1 {
 
 .gsc-badge {
   font-family: var(--mono);
-  font-size: 10px;
-  padding: 4px 10px;
+  font-size: 11px;
+  padding: 5px 11px;
   border-radius: 6px;
   border: 1px solid;
   letter-spacing: 0.05em;
@@ -1284,4 +1284,103 @@ footer {
     gap: 8px;
     align-items: flex-start;
   }
+}
+
+/* HOW-TO PANEL (shared across games) */
+.howto-panel {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  margin: 24px 0;
+  box-shadow: var(--shadow-md);
+}
+
+.howto-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.howto-steps {
+  list-style: none;
+  counter-reset: howto;
+  padding: 0;
+  margin: 0 0 22px;
+  display: grid;
+  gap: 12px;
+}
+
+.howto-steps li {
+  counter-increment: howto;
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  align-items: start;
+  gap: 14px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text2);
+}
+
+.howto-steps li::before {
+  content: counter(howto);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(43, 115, 211, 0.10);
+  border: 1px solid var(--border2);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.howto-steps strong,
+.howto-steps em {
+  color: var(--text);
+}
+
+.howto-steps code,
+.howto-example code {
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(43, 115, 211, 0.08);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.howto-example {
+  background: var(--surface2);
+  border: 1px dashed var(--border2);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+}
+
+.howto-example-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--accent2);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.howto-example-body {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text2);
+}
+
+.howto-example-body strong {
+  color: var(--text);
 }
