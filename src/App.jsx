@@ -186,7 +186,7 @@ function PageShell({
   children,
 }) {
   return (
-    <div className="shell">
+    <>
       <NavBar
         currentView={currentView}
         onNavigate={onNavigate}
@@ -195,16 +195,18 @@ function PageShell({
         onOpenAuth={onOpenAuth}
         onLogout={onLogout}
       />
-      {children}
-      <footer>
-        <div className="footer-left">
-          © {new Date().getFullYear()} CWU · Architects of Logic
-        </div>
-        <div className="footer-right">
-          Built for CS computer-architecture coursework
-        </div>
-      </footer>
-    </div>
+      <div className="shell">
+        {children}
+        <footer>
+          <div className="footer-left">
+            © {new Date().getFullYear()} CWU · Architects of Logic
+          </div>
+          <div className="footer-right">
+            Built for CS computer-architecture coursework
+          </div>
+        </footer>
+      </div>
+    </>
   );
 }
 
@@ -366,7 +368,6 @@ function HomePage({
       {/* HERO */}
       <div className="hero">
         <div className="hero-left fade-in">
-          <div className="hero-eyebrow">CWU · Spring 2026</div>
           <h1>
             Learn
             <br />
@@ -825,7 +826,7 @@ function App() {
   // Game catalog — fetch once on mount; rarely changes
   useEffect(() => {
     getGames()
-      .then(setGames)
+      .then((all) => setGames(all.filter((g) => g.status !== "coming_soon")))
       .catch(() => setGames([]));
   }, [refreshTick]);
 
