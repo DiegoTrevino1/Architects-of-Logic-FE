@@ -22,6 +22,7 @@ export default function CacheMappingGame({ mod, onBack, onHome }) {
   const [feedback, setFeedback] = useState(null); // null | "correct" | "wrong"
   const [score, setScore] = useState(0);
   const [placedCount, setPlacedCount] = useState(0);
+  const [hintVisible, setHintVisible] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -45,6 +46,7 @@ export default function CacheMappingGame({ mod, onBack, onHome }) {
     setPlacedCount(0);
     setFeedback(null);
     setSelectedSlot(null);
+    setHintVisible(false);
   };
 
   const handleSlotClick = (slotIdx) => {
@@ -78,6 +80,7 @@ export default function CacheMappingGame({ mod, onBack, onHome }) {
   const handleNext = () => {
     setFeedback(null);
     setSelectedSlot(null);
+    setHintVisible(false);
     if (reqIdx + 1 >= requests.length) {
       const finalScore = score;
       const accuracy = finalScore / (requests.length * 100);
@@ -246,7 +249,14 @@ export default function CacheMappingGame({ mod, onBack, onHome }) {
           {/* LEFT: incoming request + address decoder */}
           <div className="lcg-left-col">
             <div className="lcg-request-card">
-              <div className="lcg-req-eyebrow">📥 INCOMING REQUEST</div>
+              <div className="lcg-req-top-row">
+                <div className="lcg-req-eyebrow">📥 INCOMING REQUEST</div>
+                {req.difficulty && (
+                  <span className={`lcg-difficulty-badge lcg-difficulty-${req.difficulty}`}>
+                    {req.difficulty === "beginner" ? "⬤ Beginner" : req.difficulty === "intermediate" ? "⬤ Intermediate" : "⬤ Advanced"}
+                  </span>
+                )}
+              </div>
               <div className="lcg-req-book">{req.book}</div>
               <div className="lcg-req-addr-row">
                 <span className="lcg-req-addr-label">6-bit address:</span>
@@ -257,21 +267,36 @@ export default function CacheMappingGame({ mod, onBack, onHome }) {
                 </div>
               </div>
               <div className="lcg-decoded">
-                <div className="lcg-decoded-row"><span className="lcg-decoded-lbl tag">Tag</span><span className="lcg-decoded-val">{req.tag} → Shelf {parseInt(req.tag, 2)}</span></div>
-                <div className="lcg-decoded-row"><span className="lcg-decoded-lbl index">Index</span><span className="lcg-decoded-val">{req.index} → Slot/Set {parseInt(req.index, 2)}</span></div>
-                <div className="lcg-decoded-row"><span className="lcg-decoded-lbl offset">Offset</span><span className="lcg-decoded-val">{req.offset} → Position {parseInt(req.offset, 2)}</span></div>
+                <div className="lcg-decoded-row"><span className="lcg-decoded-lbl tag">Tag</span><span className="lcg-decoded-val">{req.tag} (identifies the block)</span></div>
+                <div className="lcg-decoded-row"><span className="lcg-decoded-lbl index">Index</span><span className="lcg-decoded-val">{req.index} (determines placement)</span></div>
+                <div className="lcg-decoded-row"><span className="lcg-decoded-lbl offset">Offset</span><span className="lcg-decoded-val">{req.offset} (byte within block)</span></div>
               </div>
 
               {mode.id === "direct" && (
-                <div className="lcg-rule-pill">Rule: Place in slot {correctSlot} (index bits)</div>
+                <div className="lcg-rule-pill">Rule: Convert the index bits to decimal → that slot number is your only valid choice</div>
               )}
               {mode.id === "set" && (
-                <div className="lcg-rule-pill index">Rule: Place in any slot in Row {parseInt(req.index, 2)} (set)</div>
+                <div className="lcg-rule-pill index">Rule: Convert the index bits to decimal → place in any open slot within that row</div>
               )}
               {mode.id === "associative" && (
-                <div className="lcg-rule-pill offset">Rule: Place in any empty slot</div>
+                <div className="lcg-rule-pill offset">Rule: No address constraint — any empty slot in the grid is valid</div>
               )}
             </div>
+
+            {feedback === null && req.hints?.[mode.id] && (
+              <div className="lcg-hint-wrap">
+                {hintVisible ? (
+                  <div className="lcg-hint-box">
+                    <span className="lcg-hint-label">💡 HINT</span>
+                    <p className="lcg-hint-text">{req.hints[mode.id]}</p>
+                  </div>
+                ) : (
+                  <button className="lcg-btn-hint" onClick={() => setHintVisible(true)}>
+                    💡 Show Hint
+                  </button>
+                )}
+              </div>
+            )}
 
             {feedback === null && (
               <button className="lcg-btn-place" onClick={handlePlace} disabled={selectedSlot === null}>
@@ -283,6 +308,12 @@ export default function CacheMappingGame({ mod, onBack, onHome }) {
               <div className="lcg-feedback correct">
                 <div className="lcg-fb-title">✓ Correct!</div>
                 <p className="lcg-fb-body">The book was placed in the right slot based on {mode.label.toLowerCase()} rules.</p>
+                {req.explanation && (
+                  <div className="lcg-explanation">
+                    <span className="lcg-explanation-label">📖 Explanation</span>
+                    <p className="lcg-explanation-text">{req.explanation}</p>
+                  </div>
+                )}
                 <button className="lcg-btn-primary" onClick={handleNext}>Next Request →</button>
               </div>
             )}
@@ -295,6 +326,12 @@ export default function CacheMappingGame({ mod, onBack, onHome }) {
                    mode.id === "set" ? `Set-associative: the index bits (${req.index}) point to Row ${parseInt(req.index, 2)}.` :
                    "Fully associative: just pick an empty slot."}
                 </p>
+                {req.explanation && (
+                  <div className="lcg-explanation">
+                    <span className="lcg-explanation-label">📖 Explanation</span>
+                    <p className="lcg-explanation-text">{req.explanation}</p>
+                  </div>
+                )}
                 <button className="lcg-btn-primary" onClick={handleNext}>Continue →</button>
               </div>
             )}
